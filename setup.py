@@ -1,4 +1,5 @@
 from setuptools import setup
+from setuptools import find_packages
 
 setup(
     name='kl',
@@ -6,4 +7,5 @@ setup(
     description="My project",
     url='https://github.com/bnm731236993/kl/tree/we731236993',
     author_email="bnm731236993@outlook.com",
+    packages=find_packages(),
 )

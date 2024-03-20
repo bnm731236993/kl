@@ -3,3 +3,4 @@ Backup/
 *.ipynb
 *.png
 Learn*.*
+/setup/*
