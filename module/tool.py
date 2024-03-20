@@ -4,10 +4,10 @@ import sys
 def isIpynb():
     """判断是否是ipynb环境"""
 
-    return "ipykernel" in sys.modules
+    return 'ipykernel' in sys.modules
 
 
-def 显示所有输出(ast_node_interactivity='all'):
+def display_all_output(ast_node_interactivity='all'):
     """
     在ipynb中显示每行的输出
         all  显示所有表达式大返回值
