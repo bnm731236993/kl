@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
-from .util import *
+# 加载当前目录下的PY文件
+from . import util
 
 
 def imshow_on_axis(mat, axis):
@@ -29,9 +30,9 @@ def imshow(mat, size=None, scale=1, dpi=300, return_figure=False):
 
     if size is not None:
         # 图片尺寸换算
-        figsize_inch = calc_figsize(size, dpi)*scale
+        figsize_inch = util.calc_figsize(size, dpi)*scale
     else:
-        figsize_inch = calc_figsize(mat.shape[:2], dpi)*scale
+        figsize_inch = util.calc_figsize(mat.shape[:2], dpi)*scale
 
     figure, ax = plt.subplots(figsize=figsize_inch, dpi=dpi)
     # 清除边缘
@@ -40,7 +41,7 @@ def imshow(mat, size=None, scale=1, dpi=300, return_figure=False):
     # 绘图
     imshow_on_axis(mat, ax)
     # 显示图片
-    show_figure(figure)
+    util.show_figure(figure)
 
     if return_figure:
         # 如果需要返回Figure
@@ -66,7 +67,7 @@ def imshows(mats,
     if grid is None:
         grid = (1, len(mats))
 
-    figsize_inch = calc_figsize(size, dpi)
+    figsize_inch = util.calc_figsize(size, dpi)
     figure, axis_grid = plt.subplots(
         nrows=grid[0],
         ncols=grid[1],
@@ -94,7 +95,7 @@ def imshows(mats,
                 imshow_on_axis(mats[idx], axis)
 
     # 显示图片
-    show_figure(figure)
+    util.show_figure(figure)
 
     if return_figure:
         # 如果需要返回Figure
@@ -129,7 +130,7 @@ def imshows_with_titles(mats,
         grid = (1, len(mats))
 
     # 图像大小换算
-    figsize_inch = calc_figsize(size, dpi)
+    figsize_inch = util.calc_figsize(size, dpi)
     figure, axis_grid = plt.subplots(
         nrows=grid[0],
         ncols=grid[1],
@@ -178,7 +179,7 @@ def imshows_with_titles(mats,
                                    fontdict=fontdict)
 
     # 显示图片
-    show_figure(figure)
+    util.show_figure(figure)
 
     if return_figure:
         # 如果需要返回Figure

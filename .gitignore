@@ -1,6 +1,5 @@
 Backup/
-*/__pycache__/*
+data/*
+setup/*
+*.pyc
 *.ipynb
-*.png
-Learn*.*
-/setup/*
