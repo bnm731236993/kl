@@ -45,3 +45,16 @@ def calc_figsize(size_px, dpi=300):
     # 输出适用于matplotlib的形状
     size_inch = size_px.astype(np.float32)/dpi
     return size_inch
+
+
+def channel_revise(mat):
+    '''
+    对于第一维度为通道维度的情况
+    调整到第三维度
+    '''
+    if len(mat.shape) < 3:
+        # 如果图片没有三个维度
+        raise Exception(f"Image's dimension is {len(mat.shape)}")
+
+    # 第一维度为通道维度
+    return np.transpose(mat, axes=(1, 2, 0))

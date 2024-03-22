@@ -23,7 +23,12 @@ def imshow_on_axis(mat, axis):
     _ = axis.imshow(mat)
 
 
-def imshow(mat, size=None, scale=1, dpi=300, return_figure=False):
+def imshow(mat,
+           size=None,
+           scale=1,
+           dpi=300,
+           channel_first=False,
+           return_figure=False):
     '''
     绘制图片
     返回Pillow格式
@@ -32,10 +37,15 @@ def imshow(mat, size=None, scale=1, dpi=300, return_figure=False):
         size  图像大小
             留空则使用原图大小
         scale  缩放
+        channel_first  通道维度是否为第一维度
         return_figure  是否返回Figure对象
     '''
     if scale <= 0:
+        # 如果缩放倍率错误
         raise Exception('Scale must be greater than zero')
+    if channel_first:
+        # 调整维度顺序
+        mat = util.channel_revise(mat)
 
     if size is not None:
         # 图片尺寸换算
@@ -65,6 +75,7 @@ def imshows(mats,
             padding=(0.05, 0.95),
             space=(0.1, 0.1),
             dpi=300,
+            channel_first=False,
             return_figure=False):
     '''
     在网格上绘制多副图
@@ -92,7 +103,20 @@ def imshows(mats,
         # 如果只有一行
         for c in range(grid[1]):
             axis = axis_grid[c]
-            imshow_on_axis(mats[c], axis)
+            mat = mats[c]
+            if channel_first:
+                # 调整维度顺序
+                mat = util.channel_revise(mat)
+            imshow_on_axis(mat, axis)
+    elif grid[1] == 1:
+        # 如果只有一列
+        for c in range(grid[0]):
+            axis = axis_grid[c]
+            mat = mats[c]
+            if channel_first:
+                # 调整维度顺序
+                mat = util.channel_revise(mat)
+            imshow_on_axis(mat, axis)
     else:
         # 如果有多行
         for r in range(grid[0]):
@@ -100,8 +124,12 @@ def imshows(mats,
                 axis = axis_grid[r][c]
                 # 1D索引
                 idx = r*grid[1]+c
+                mat = mats[idx]
+                if channel_first:
+                    # 调整维度顺序
+                    mat = util.channel_revise(mat)
                 # 绘图
-                imshow_on_axis(mats[idx], axis)
+                imshow_on_axis(mat, axis)
 
     # 显示图片
     util.show_figure(figure)
