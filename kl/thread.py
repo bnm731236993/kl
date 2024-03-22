@@ -4,7 +4,7 @@ import threading
 from tqdm import tqdm
 from tqdm.notebook import tqdm as tqdm_notebook
 
-from .tool import isIpynb
+from .tool import is_ipynb
 
 
 class MyThread:
@@ -127,7 +127,7 @@ class MyThread:
         """创建进度条"""
 
         # 区分ipynb和py环境
-        if isIpynb():
+        if is_ipynb():
             self.bar = tqdm_notebook(total=self.num_all, initial=0)
         else:
             self.bar = tqdm(total=self.num_all)

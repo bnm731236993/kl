@@ -1,3 +1,5 @@
+import numpy as np
+
 import matplotlib.pyplot as plt
 
 # 加载当前目录下的PY文件
@@ -6,6 +8,13 @@ from . import util
 
 def imshow_on_axis(mat, axis):
     '''在网格处绘制图片'''
+    if np.issubdtype(mat.dtype, np.floating):
+        if 0 < mat.min() or mat.max() > 1:
+            raise Exception('The range of float data is [0,1]')
+    elif np.issubdtype(mat.dtype, np.integer):
+        if 0 < mat.min() or mat.max() > 255:
+            raise Exception('The range of integer data is [0,255]')
+
     # 关闭网格
     _ = axis.grid(False)
     # 关闭坐标轴
@@ -26,7 +35,7 @@ def imshow(mat, size=None, scale=1, dpi=300, return_figure=False):
         return_figure  是否返回Figure对象
     '''
     if scale <= 0:
-        raise Exception('ERROR: scale<=0')
+        raise Exception('Scale must be greater than zero')
 
     if size is not None:
         # 图片尺寸换算
@@ -51,7 +60,7 @@ def imshow(mat, size=None, scale=1, dpi=300, return_figure=False):
 
 
 def imshows(mats,
-            grid=None,
+            grid=(1, 1),
             size=(500, 500),
             padding=(0.05, 0.95),
             space=(0.1, 0.1),
@@ -64,8 +73,8 @@ def imshows(mats,
         grid  网格排布
         space  图片hw间距
     '''
-    if grid is None:
-        grid = (1, len(mats))
+    if len(mats) != grid[0]*grid[1]:
+        raise Exception('Input length is not equal to the number of grids')
 
     figsize_inch = util.calc_figsize(size, dpi)
     figure, axis_grid = plt.subplots(
