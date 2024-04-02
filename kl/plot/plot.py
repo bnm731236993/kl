@@ -9,10 +9,10 @@ from . import util
 def imshow_on_axis(mat, axis):
     '''在网格处绘制图片'''
     if np.issubdtype(mat.dtype, np.floating):
-        if 0 < mat.min() or mat.max() > 1:
+        if mat.min() < 0 or mat.max() > 1:
             raise Exception('The range of float data is [0,1]')
     elif np.issubdtype(mat.dtype, np.integer):
-        if 0 < mat.min() or mat.max() > 255:
+        if mat.min() < 0 or mat.max() > 255:
             raise Exception('The range of integer data is [0,255]')
 
     # 关闭网格
