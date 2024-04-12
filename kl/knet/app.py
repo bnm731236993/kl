@@ -1,6 +1,15 @@
 from typing import Literal
 
+import torch as tc
 import torch.nn as nn
+
+
+def init_normal(net: nn.Module,
+                seed: int = 0) -> None:
+    '''根据正态分布，初始化模型的所有权重'''
+    for param in net.parameters():
+        _ = tc.random.manual_seed(seed)
+        _ = nn.init.normal_(param.data, mean=0, std=1)
 
 
 def conv2dBN(c_in: int,
