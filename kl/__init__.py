@@ -1,3 +1,3 @@
 # 加载子文件
-from . import tool
+from .app import *
 from . import thread

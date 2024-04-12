@@ -4,7 +4,7 @@ import threading
 from tqdm import tqdm
 from tqdm.notebook import tqdm as tqdm_notebook
 
-from .tool import is_ipynb
+from .app import is_ipynb
 
 
 class MyThread:

@@ -1,13 +1,16 @@
+from typing import Literal
+
 import sys
 
 
-def is_ipynb():
+def is_ipynb() -> bool:
     """判断是否是ipynb环境"""
 
     return 'ipykernel' in sys.modules
 
 
-def display_all_output(ast_node_interactivity='all'):
+def display_all_output(
+        ast_node_interactivity: Literal['all', 'last_expr', 'none'] = 'all') -> None:
     """
     在ipynb中显示每行的输出
         all  显示所有表达式大返回值
