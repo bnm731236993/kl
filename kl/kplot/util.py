@@ -7,6 +7,23 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
+def get_size_for_plt(
+        shape: tuple,
+        channel_first: bool = False) -> tuple:
+    '''
+    获取矩阵的shape
+    并将hw变换为wh
+    参数:
+        shape  直接输入矩阵的shaple元组
+    '''
+    # 获取图片像素大小，注意Num中图片大小为hw
+    # 要变换为wh
+    if channel_first:
+        return (shape[-1], shape[-2])
+    else:
+        return (shape[1], shape[0])
+
+
 def disable_auto_display():
     '''关闭Matplotlib对图片的自动显示'''
     # 判断“交互性”

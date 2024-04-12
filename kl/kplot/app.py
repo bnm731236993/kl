@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 # 加载当前目录下的PY文件
 from . import util
+from .util import disable_auto_display
 
 
 def imshow_on_axis(mat, axis):
@@ -23,12 +24,12 @@ def imshow_on_axis(mat, axis):
     _ = axis.imshow(mat)
 
 
-def imshow(mat,
-           size=None,
-           scale=1,
-           dpi=300,
-           channel_first=False,
-           return_figure=False):
+def imshow(mat: np.ndarray,
+           size: tuple = None,
+           scale: int = 1,
+           dpi: int = 300,
+           channel_first: bool = False,
+           return_figure: bool = False):
     '''
     绘制图片
     返回Pillow格式
@@ -51,7 +52,11 @@ def imshow(mat,
         # 图片尺寸换算
         figsize_inch = util.calc_figsize(size, dpi)*scale
     else:
-        figsize_inch = util.calc_figsize(mat.shape[:2], dpi)*scale
+        # 获取图片像素wh
+        img_size = util.get_size_for_plt(
+            shape=mat.shape,
+            channel_first=channel_first)
+        figsize_inch = util.calc_figsize(img_size, dpi)*scale
 
     figure, ax = plt.subplots(figsize=figsize_inch, dpi=dpi)
     # 清除边缘
