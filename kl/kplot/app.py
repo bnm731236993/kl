@@ -1,13 +1,15 @@
+from typing import Optional
+
 import numpy as np
 
 import matplotlib.pyplot as plt
 
 # 加载当前目录下的PY文件
 from . import util
-from .util import disable_auto_display
 
 
-def imshow_on_axis(mat, axis):
+def imshow_on_axis(mat: np.ndarray,
+                   axis: plt.Axes) -> None:
     '''在网格处绘制图片'''
     if np.issubdtype(mat.dtype, np.floating):
         if mat.min() < 0 or mat.max() > 1:
@@ -17,26 +19,24 @@ def imshow_on_axis(mat, axis):
             raise Exception('The range of integer data is [0,255]')
 
     # 关闭网格
-    _ = axis.grid(False)
-    # 关闭坐标轴
-    _ = axis.set_axis_off()
+    util.disable_grid_and_axis(axis)
     # 绘图
     _ = axis.imshow(mat)
 
 
 def imshow(mat: np.ndarray,
-           size: tuple = None,
+           size: Optional[tuple[int, int]] = None,
            scale: int = 1,
            dpi: int = 300,
            channel_first: bool = False,
+           display_figure: bool = True,
            return_figure: bool = False):
     '''
     绘制图片
     返回Pillow格式
 
     参数:
-        size  图像大小
-            留空则使用原图大小
+        size  图像大小  [高，宽]
         scale  缩放
         channel_first  通道维度是否为第一维度
         return_figure  是否返回Figure对象
@@ -48,55 +48,70 @@ def imshow(mat: np.ndarray,
         # 调整维度顺序
         mat = util.channel_revise(mat)
 
-    if size is not None:
-        # 图片尺寸换算
-        figsize_inch = util.calc_figsize(size, dpi)*scale
-    else:
-        # 获取图片像素wh
-        img_size = util.get_size_for_plt(
-            shape=mat.shape,
-            channel_first=channel_first)
-        figsize_inch = util.calc_figsize(img_size, dpi)*scale
+    # 创建图表对象
+    figure, axis = plt.subplots(dpi=dpi)
 
-    figure, ax = plt.subplots(figsize=figsize_inch, dpi=dpi)
+    # 如果没有传入图片形状
+    if size is None:
+        # 此处维度已经被调整
+        size = mat.shape[:2]
+
+    # 设定图片大小
+    util.figure_resize(figure=figure,
+                       size=size,
+                       scale=scale,
+                       dpi=dpi,
+                       is_inch=False)
+
     # 清除边缘
     _ = figure.subplots_adjust(left=0, right=1,
                                top=1, bottom=0)
     # 绘图
-    imshow_on_axis(mat, ax)
-    # 显示图片
-    util.show_figure(figure)
+    imshow_on_axis(mat, axis)
+
+    if display_figure:
+        # 显示图片
+        util.show_figure(figure)
 
     if return_figure:
         # 如果需要返回Figure
         return figure
-    # 否则删除Figure
-    plt.close()
+    else:
+        # 否则删除figure对象
+        plt.close()
 
 
-def imshows(mats,
-            grid=(1, 1),
-            size=(500, 500),
-            padding=(0.05, 0.95),
-            space=(0.1, 0.1),
-            dpi=300,
-            channel_first=False,
-            return_figure=False):
+def imshows(mats: np.ndarray,
+            grid: tuple = (1, 1),
+            size: tuple[int, int] = (500, 500),
+            padding: tuple[float, float] = (0.05, 0.95),
+            space: tuple[float, float] = (0.1, 0.1),
+            dpi: int = 300,
+            channel_first: bool = False,
+            display_figure: bool = True,
+            return_figure: bool = False):
     '''
     在网格上绘制多副图
 
     参数:
         grid  网格排布
         space  图片hw间距
+        display_figure  是否自动显示图像
     '''
     if len(mats) != grid[0]*grid[1]:
         raise Exception('Input length is not equal to the number of grids')
 
-    figsize_inch = util.calc_figsize(size, dpi)
-    figure, axis_grid = plt.subplots(
-        nrows=grid[0],
-        ncols=grid[1],
-        figsize=figsize_inch, dpi=dpi)
+    # 创建图表对象
+    figure, axis_grid = plt.subplots(nrows=grid[0],
+                                     ncols=grid[1],
+                                     dpi=dpi)
+    # 设定图表大小
+    util.figure_resize(figure=figure,
+                       size=size,
+                       scale=1,
+                       dpi=dpi,
+                       is_inch=False)
+
     # 设置最小边缘
     _ = figure.subplots_adjust(left=padding[0],
                                right=padding[1],
@@ -104,6 +119,7 @@ def imshows(mats,
                                top=padding[1],
                                hspace=space[0],
                                wspace=space[1])
+
     if grid[0] == 1:
         # 如果只有一行
         for c in range(grid[1]):
@@ -136,14 +152,16 @@ def imshows(mats,
                 # 绘图
                 imshow_on_axis(mat, axis)
 
-    # 显示图片
-    util.show_figure(figure)
+    if display_figure:
+        # 显示图片
+        util.show_figure(figure)
 
     if return_figure:
         # 如果需要返回Figure
         return figure
-    # 否则删除Figure
-    plt.close()
+    else:
+        # 否则删除Figure
+        plt.close()
 
 
 def imshows_with_titles(mats,

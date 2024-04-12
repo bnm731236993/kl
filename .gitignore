@@ -1,6 +1,6 @@
 # 无关文件
 Backup/
-data/*
+static/*
 setup/*
 *.pyc
 

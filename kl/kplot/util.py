@@ -7,24 +7,37 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-def get_size_for_plt(
-        shape: tuple,
-        channel_first: bool = False) -> tuple:
+def figure_resize(figure: plt.Figure,
+                  size: tuple,
+                  scale: int = 1,
+                  dpi: int = 300,
+                  is_inch: bool = False) -> None:
     '''
-    获取矩阵的shape
-    并将hw变换为wh
+    修改图表的形状
     参数:
-        shape  直接输入矩阵的shaple元组
+        is_inch  是否传入的是英寸
     '''
-    # 获取图片像素大小，注意Num中图片大小为hw
-    # 要变换为wh
-    if channel_first:
-        return (shape[-1], shape[-2])
+    if is_inch:
+        # 如果传入的尺寸是英寸
+        size_inch = size
     else:
-        return (shape[1], shape[0])
+        # 图片尺寸换算
+        size_inch = calc_figsize(size, dpi)*scale
+    # 在此处修改dpi会有问题
+    # figure.set_dpi(dpi)
+    figure.set_figheight(size_inch[0])
+    figure.set_figwidth(size_inch[1])
 
 
-def disable_auto_display():
+def disable_grid_and_axis(axis: plt.Axes) -> None:
+    '''关闭轴的网格和坐标轴'''
+    # 关闭网格
+    _ = axis.grid(False)
+    # 关闭坐标轴
+    _ = axis.set_axis_off()
+
+
+def disable_auto_display() -> None:
     '''关闭Matplotlib对图片的自动显示'''
     # 判断“交互性”
     if plt.isinteractive():
