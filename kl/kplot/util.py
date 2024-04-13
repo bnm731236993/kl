@@ -1,5 +1,6 @@
 import io
-from IPython import display
+# 大写避免混淆
+from IPython import display as Display
 
 import numpy as np
 
@@ -29,12 +30,30 @@ def figure_resize(figure: plt.Figure,
     figure.set_figwidth(size_inch[1])
 
 
-def disable_grid_and_axis(axis: plt.Axes) -> None:
+def disable_grid_and_axis(ax: plt.Axes) -> None:
     '''关闭轴的网格和坐标轴'''
     # 关闭网格
-    _ = axis.grid(False)
+    _ = ax.grid(False)
     # 关闭坐标轴
-    _ = axis.set_axis_off()
+    _ = ax.set_axis_off()
+
+
+def imshow_to_ax(mat: np.ndarray,
+                 ax: plt.Axes) -> None:
+    '''在网格处绘制图片（不即时显示）'''
+    if np.issubdtype(mat.dtype, np.floating):
+        if mat.min() < 0 or mat.max() > 1:
+            raise Exception(
+                '''Input's dtype is float, but value is't within the range of [0,1]''')
+    elif np.issubdtype(mat.dtype, np.integer):
+        if mat.min() < 0 or mat.max() > 255:
+            raise Exception(
+                '''Input's dtype is integer, but value is't within the range of [0,255]''')
+
+    # 关闭网格
+    disable_grid_and_axis(ax)
+    # 绘图
+    _ = ax.imshow(mat)
 
 
 def disable_auto_display() -> None:
@@ -45,36 +64,35 @@ def disable_auto_display() -> None:
         _ = plt.ioff()
 
 
-def figure_to_PIL(figure, format='png'):
+def figure_to_PIL(figure: plt.Figure,
+                  format: str = 'png'):
     '''Matplotlib转Pillow'''
     # 字节流
     img_buffer = io.BytesIO()
     # 将图片输出到字节流
     _ = figure.savefig(img_buffer, format=format)
     # 从字节流读取
-    img = Image.open(img_buffer)
-    return img
+    image = Image.open(img_buffer)
+    return image
 
 
-def show_figure(figure):
+def display_figure(figure: plt.Figure) -> None:
     '''绘制Figure'''
     # 转换为Pillow图片
-    fig_img = figure_to_PIL(figure)
+    fig_img = figure_to_PIL(figure, format='png')
     # Pillow无法正常显示RGBA图片
-    # 直接用display显示
-    display.display_png(fig_img)
+    # 用display显示
+    Display.display_png(fig_img)
 
 
-def calc_figsize(size_px, dpi=300):
+def calc_figsize(size: tuple[int, int],
+                 dpi: int = 300) -> tuple:
     '''
     将像素形状换算为适用于Matplotlib的形状
     '''
-    if not isinstance(size_px, np.ndarray):
-        # 转化为Num数据
-        size_px = np.array(size_px)
-    # 输出适用于matplotlib的形状
-    size_inch = size_px.astype(np.float32)/dpi
-    return size_inch
+    if size[0] <= 0 or size[1] <= 0:
+        raise Exception('height or width <= 0')
+    return size[0]/dpi, size[1]/dpi
 
 
 def channel_revise(mat):
