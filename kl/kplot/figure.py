@@ -3,7 +3,7 @@ from typing import Optional, Union, Literal
 import numpy as np
 import matplotlib.pyplot as plt
 
-from . import util
+from 。 import util
 
 
 class KFigure:
@@ -33,8 +33,8 @@ class KFigure:
             self.resize(size=size, is_inch=is_inch)
 
         # 调整样式
-        self.set_padding()
-        self.set_space()
+        # self.set_padding()
+        # self.set_space()
 
     @property
     def axes(self) -> list:
