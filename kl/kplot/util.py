@@ -50,8 +50,6 @@ def imshow_to_ax(mat: np.ndarray,
             raise Exception(
                 '''Input's dtype is integer, but value is't within the range of [0,255]''')
 
-    # 关闭网格
-    disable_grid_and_axis(ax)
     # 绘图
     _ = ax.imshow(mat)
 

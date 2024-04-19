@@ -3,7 +3,7 @@ from typing import Optional, Union, Literal
 import numpy as np
 import matplotlib.pyplot as plt
 
-from 。 import util
+from . import util
 
 
 class KFigure:
@@ -31,10 +31,6 @@ class KFigure:
             # 缩放
             # 使用位置参数可能有问题
             self.resize(size=size, is_inch=is_inch)
-
-        # 调整样式
-        # self.set_padding()
-        # self.set_space()
 
     @property
     def axes(self) -> list:
@@ -107,6 +103,12 @@ class KFigure:
 
     def imshow(self,
                mat: np.ndarray,
-               coord: tuple = (0, 0)) -> None:
+               coord: tuple = (0, 0),
+               use_disable_grid_and_axis=True) -> None:
         '''（快捷）绘制图片到指定子表'''
-        util.imshow_to_ax(mat=mat, ax=self.ax(coord=coord))
+        ax = self.ax(coord=coord)
+        if use_disable_grid_and_axis:
+            # 关闭网格
+            util.disable_grid_and_axis(ax)
+        # 绘图
+        util.imshow_to_ax(mat=mat, ax=ax)
