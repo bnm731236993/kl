@@ -120,3 +120,9 @@ class SummaryManager:
                       fp=fp,
                       indent=4,
                       ensure_ascii=False)
+
+    def load(self):
+        '''保存为JSON'''
+        path = self.root_dir/Path('summary.json')
+        with open(path, mode='r', encoding='utf-8') as fp:
+            self.storage = json.load(fp=fp)

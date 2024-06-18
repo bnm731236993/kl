@@ -41,15 +41,23 @@ class Trainer:
         # 精度计算器
         self.metric = metric
 
+        # 是否有测试集
+        self.enable_test = False
+        if data_test_loader is not None:
+            self.enable_test = True
+
         # 批数据迭代器
         self.data_train_loader = data_train_loader
-        self.data_test_loader = data_test_loader
+        if self.enable_test:
+            self.data_test_loader = data_test_loader
 
         # 所使用的设备
         # 模型应该提前移动到指定位置
         # 该属性只用于数据转移
-        self.device = device if isinstance(device, tc.device) \
-            else tc.device(device)
+        if isinstance(device, tc.device):
+            self.device = device
+        else:
+            self.device = tc.device(device)
 
         # 当前轮次
         self.epoch = 1
@@ -59,7 +67,8 @@ class Trainer:
         self.batch_size = self.data_train_loader.batch_size
         # 每轮的批数量
         self.num_batch_train = len(self.data_train_loader)
-        self.num_batch_test = len(self.data_test_loader)
+        if self.enable_test:
+            self.num_batch_test = len(self.data_test_loader)
 
         # 根目录
         self.roor_dir = Path(roor_dir)
@@ -70,6 +79,8 @@ class Trainer:
             self.roor_dir = self.roor_dir/Path(current_time)
         # 创建文件夹
         self.roor_dir.mkdir(parents=True, exist_ok=True)
+        # 训练信息文件
+        self.info_fp = self.roor_dir/Path('info.json')
 
         # 打印信息的等级
         # 0  不记录任何信息
@@ -122,6 +133,13 @@ class Trainer:
         Y = self.net(X)
         return Y, Y_true
 
+    def update_metric(self, Y, Y_true):
+        '''更新精度'''
+        with tc.no_grad():
+            _ = self.metric.update(Y, Y_true)
+            acc = self.metric.compute()
+        return acc
+
     def _fit_batch(self, is_training: bool = True):
         if is_training:
             # 训练模式
@@ -158,10 +176,8 @@ class Trainer:
                     # 预测
                     Y, Y_true = self.predict(data)
 
-            with tc.no_grad():
-                # 更新精度
-                _ = self.metric.update(Y, Y_true)
-                acc = self.metric.compute()
+            # 更新精度
+            acc = self.update_metric(Y, Y_true)
 
             # 计时
             time_batch_delta = time.time() - time_batch_begin
@@ -193,7 +209,7 @@ class Trainer:
         self.summaryManager.append(
             input=epoch_info)
 
-        if self.enable_earlyStop and not is_training:
+        if self.enable_earlyStop and is_training:
             # 更新早停记录器
             self.earlyStop.update(epoch_info[self.earlyStop_aim])
 
@@ -207,6 +223,23 @@ class Trainer:
         if self.verbose >= verbose:
             print(text, *args, **kwargs)
 
+    def load(self):
+        # 保存权重
+        if self.enable_checkpointManager:
+            # 加载权重
+            self.checkpointManager.load()
+            self._print('Load checkpoint finish.', verbose=1)
+            # 加载记录
+            self.summaryManager.load()
+            self._print('Load summary finish.', verbose=1)
+
+        # 加载训练信息
+        with open(self.info_fp, 'r', encoding='utf-8') as fs:
+            info = json.load(fp=fs)
+        for attr in ['epoch', 'batch', 'num_epoch']:
+            if attr in info and hasattr(self, attr):
+                setattr(self, attr, info[attr])
+
     def save(self):
         # 保存权重
         if self.enable_checkpointManager:
@@ -214,6 +247,15 @@ class Trainer:
             self.checkpointManager.save()
             # 保存记录
             self.summaryManager.save()
+
+        # 训练信息
+        info = {attr: getattr(self, attr) for attr in [
+            'epoch', 'batch', 'num_epoch']}
+        with open(self.info_fp, 'w', encoding='utf-8') as fs:
+            json.dump(info,
+                      fp=fs,
+                      indent=4,
+                      ensure_ascii=False)
 
     def fit(self):
         # 遍历批
@@ -228,11 +270,12 @@ class Trainer:
 
             # =======================================================
             # 开始测试
-            self._print(
-                text=f'Test Epoch:{self.epoch} Begin',
-                verbose=1)
-            # 批测试
-            self._fit_batch(is_training=False)
+            if self.enable_test:
+                self._print(
+                    text=f'Test Epoch:{self.epoch} Begin',
+                    verbose=1)
+                # 批测试
+                self._fit_batch(is_training=False)
 
             # =======================================================
             # 保存权重
