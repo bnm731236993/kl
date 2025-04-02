@@ -1,9 +1,9 @@
 # 无关文件
 Backup/
-static/*
-setup/*
+static
+setup
+output
 *.pyc
 
 # 测试文件
-*.ipynb
-test.*
+*test*
